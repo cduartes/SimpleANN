@@ -31,24 +31,10 @@ function main(argv="")
   # Parameters
   h_nodes = 3;
   iterations = 1;
-  weights = rand(1,cols)
+  w = rand(1,cols)
   c = rand(h_nodes, cols)
   r = rand(h_nodes, cols)
-  clc
-  # input to hidden layer
-  z1 = transfer(weights, transpose(DATASET), h_nodes, c, r)
-  # hidden layer to output layer
-  [cols,rows] = size(z1)
-  o = zeros(1,rows)
-  pause
-  for o_i=1:rows
-    c = rand(1,rows);
-    r = rand(1,rows);
-    o(o_i) = activation(z1(o_i), c, r, 1)
-  endfor
-  pause
-  [cols,rows] = size(o);
-  for o_i=1:rows
-    fprintf(" Result: %d\n", sign(o(o_i)))
-  endfor
+  if train
+    (w,c,r) = train(w,DATASET, h_nodes, c, r)
+  endif
 endfunction
