@@ -23,18 +23,18 @@ function main(argv="")
       a++;
     endfor
   else
-    DATASET = A;
+    DATASET_input = A(:,1:cols-1);
+    DATASET_class = A(:,cols)
   endif
-  DATASET
-  [rows,cols]=size(DATASET);
-
+  DATASET_input
   # Parameters
   h_nodes = 3;
-  iterations = 1;
-  w = rand(1,cols)
-  c = rand(h_nodes, cols)
-  r = rand(h_nodes, cols)
-  if train
-    (w,c,r) = train(w,DATASET, h_nodes, c, r)
+  iterations = 2;
+  train_flag = 1;
+  if train_flag
+    [w,c,r] = train(DATASET_input,h_nodes,iterations,5)
   endif
+  w
+  c
+  r
 endfunction
