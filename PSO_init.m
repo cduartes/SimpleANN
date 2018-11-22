@@ -1,7 +1,7 @@
-function [w,r,c] = PSO_init(h_nodes,rows,cols,n_p)
+function [w,r,c] = PSO_init(h_nodes,cols,n_p)
   w = rand(1,cols)
-  c = rand(h_nodes, cols)
   r = rand(h_nodes, cols)
+  c = rand(h_nodes, cols)
   
   #{
   for p = 1:n_p
