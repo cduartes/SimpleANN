@@ -37,20 +37,15 @@ function main(argv="")
   train_flag = 1;
   n_particles = 1;
   best_mse = intmax;
-  [w,r,c] = PSO_init(h_nodes,cols-1,n_particles)
-  #{
-  for p = 1:n_particles
-    particles(p).id = p; 
-    particles(p).nombre = "nombre de particula";
-    particles(p).x = 1;
-    particles(p).pbest = intmax;
-  endfor
-  #}
-  #[w,r,c] = PSO_init(h_nodes,cols,n_particles,particles)
+  particles = PSO_init(h_nodes,cols-1,n_particles)
+  pause
   # inicializar PSO una vez
   if train_flag
     for i = 1:iterations
       for p = 1:n_particles
+        w = particles(p).x(:,1)
+        r = particles(p).x(:,2:cols)
+        c = particles(p).x(:,cols+1:end)
         o = train(w, r, c, DATASET_input, h_nodes)
         current_mse = mse(DATASET_class,transpose(o));
         if current_mse < best_mse
@@ -64,6 +59,7 @@ function main(argv="")
       # comparar colectivo -> setear el mejor de enjambre
       # mover particulas de acuerdo a evaluación
       [w,r,c] = PSO_movement(h_nodes,cols,n_particles)
+      # particles = PSO_movement(h_nodes,cols,n_particles) #debe retornar las particulas actualizadas
     endfor
     best_mse
     best_w
