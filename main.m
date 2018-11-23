@@ -2,8 +2,15 @@
 function main(argv="")
   clc
   disp("Artificial Neural Network")
+  
+  # Matriz simple
+  #{
   load input.mat
   A
+  #}
+  load train.mat
+  A
+  
   [rows,cols]=size(A);
   DATASET_class = A(:,cols)
   
@@ -32,7 +39,7 @@ function main(argv="")
   
   # Parameters
   h_nodes = 3;
-  iterations = 1000;
+  iterations = 100;
   train_flag = 1;
   n_particles = 20;
   cog_coef = 2;
@@ -72,13 +79,21 @@ function main(argv="")
     best_c = best_x(:,cols+1:end);
   endif
   testing_flag = 1;
-  DATA_test = [1,1,0;1,1,0]
+  
+  
+  # DATA_test = [1,1,0;1,1,0]
+  
+  load test.mat
+  DATA_test
+  
+  
   if testing_flag
-    o = train(best_w, best_r, best_c, DATA_test, h_nodes)
+    o = train(best_w, best_r, best_c, DATA_test, h_nodes);
     [rows,cols] = size(o);
     for o_i = 1:cols
       disp(sign(o(o_i)))
     endfor
+    DATASET_class
   endif
   f_plot(iterations, mse_log);
 endfunction
