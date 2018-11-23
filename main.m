@@ -7,7 +7,7 @@ function main(argv="")
   [rows,cols]=size(A);
   DATASET_class = A(:,cols)
   
-  # column selection
+  # Feature selection
   if length(argv)>0
     printf("Archivo de configuracion: %s\n",argv)
     fid = fopen (argv, 'r');
@@ -26,54 +26,67 @@ function main(argv="")
     endfor
   else
     DATASET_input = A(:,1:cols-1);
-    
   endif
   
   DATASET_input
   
   # Parameters
   h_nodes = 3;
-  iterations = 5;
+  iterations = 1000;
   train_flag = 1;
-  n_particles = 1;
-  best_mse = intmax;
-  particles = PSO_init(h_nodes,cols-1,n_particles)
-  pause
+  n_particles = 20;
+  cog_coef = 2;
+  col_coef = 2;
+  best_fit = intmax;
+  mse_log = zeros(1,iterations);
+  w_max = 0.95;
+  w_min = 0.1;
+  particles = PSO_init(h_nodes,cols-1,n_particles);
   # inicializar PSO una vez
   if train_flag
     for i = 1:iterations
       for p = 1:n_particles
-        w = particles(p).x(:,1)
-        r = particles(p).x(:,2:cols)
-        c = particles(p).x(:,cols+1:end)
-        o = train(w, r, c, DATASET_input, h_nodes)
-        current_mse = mse(DATASET_class,transpose(o));
-        if current_mse < best_mse
-          best_mse = current_mse;
-          best_w = w;
-          best_c = c;
-          best_r = r;
+        w = particles(p).x(:,1);
+        r = particles(p).x(:,2:cols);
+        c = particles(p).x(:,cols+1:end);
+        o = train(w, r, c, DATASET_input, h_nodes);
+        current_fit = mse(DATASET_class, transpose(o));
+        # comparar cognitivo de particula -> setear el mejor de particula
+        if current_fit < particles(p).pbest
+          particles(p).pbest = current_fit;
+          particles(p).xbest = cat(2,w,r,c);
+          # comparar colectivo de enjambre -> setear el mejor de enjambre
+          if current_fit < best_fit
+            best_fit = current_fit;
+            best_x = particles(p).xbest;
+          endif
         endif
-        # comparar cognitivo de particula -> setear el mejor local
       endfor
-      # comparar colectivo -> setear el mejor de enjambre
+      mse_log(i) = best_fit;
       # mover particulas de acuerdo a evaluación
-      [w,r,c] = PSO_movement(h_nodes,cols,n_particles)
-      # particles = PSO_movement(h_nodes,cols,n_particles) #debe retornar las particulas actualizadas
+      inercia = cal_inercia(w_max, w_min, iterations, i);
+      particles = PSO_movement(h_nodes, cols, n_particles, particles, col_coef, cog_coef, best_x, inercia);
     endfor
-    best_mse
-    best_w
-    best_c
-    best_r
+    best_w = best_x(:,1);
+    best_r = best_x(:,2:cols);
+    best_c = best_x(:,cols+1:end);
   endif
   testing_flag = 1;
-  DATA_test = [0,0,1]
-  pause
+  DATA_test = [1,1,0;1,1,0]
   if testing_flag
     o = train(best_w, best_r, best_c, DATA_test, h_nodes)
     [rows,cols] = size(o);
-    for o_i = rows
+    for o_i = 1:cols
       disp(sign(o(o_i)))
     endfor
   endif
+  f_plot(iterations, mse_log);
+endfunction
+
+function f_plot(iterations, mse_log)
+  x = 1:1:iterations;
+  plot (x, mse_log(x));
+  xlabel ("x");
+  ylabel ("sin (x)");
+  title ("Simple 2-D Plot");
 endfunction
