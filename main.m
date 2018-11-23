@@ -4,15 +4,17 @@ function main(argv="")
   disp("Artificial Neural Network")
   
   # Matriz simple
-  #{
+  
   load input.mat
   A
-  #}
-  load train.mat
-  A
   
+  #{
+  load train.mat
+  train;
+  A = train;
+  #}
   [rows,cols]=size(A);
-  DATASET_class = A(:,cols)
+  DATASET_class = A(:,cols);
   
   # Feature selection
   if length(argv)>0
@@ -53,15 +55,15 @@ function main(argv="")
   if train_flag
     for i = 1:iterations
       for p = 1:n_particles
-        w = particles(p).x(:,1);
-        r = particles(p).x(:,2:cols);
-        c = particles(p).x(:,cols+1:end);
+        w = particles(p).x(1,:); #revisar concatenacion
+        r = particles(p).x(2:cols,:);
+        c = particles(p).x(cols+1:end,:);
         o = train(w, r, c, DATASET_input, h_nodes);
         current_fit = mse(DATASET_class, transpose(o));
         # comparar cognitivo de particula -> setear el mejor de particula
         if current_fit < particles(p).pbest
           particles(p).pbest = current_fit;
-          particles(p).xbest = cat(2,w,r,c);
+          particles(p).xbest = cat(1,w,r,c);
           # comparar colectivo de enjambre -> setear el mejor de enjambre
           if current_fit < best_fit
             best_fit = current_fit;
@@ -74,18 +76,21 @@ function main(argv="")
       inercia = cal_inercia(w_max, w_min, iterations, i);
       particles = PSO_movement(h_nodes, cols, n_particles, particles, col_coef, cog_coef, best_x, inercia);
     endfor
-    best_w = best_x(:,1);
-    best_r = best_x(:,2:cols);
-    best_c = best_x(:,cols+1:end);
+    disp("sutff")
+    pause
+    best_w = best_x(1, :);
+    best_r = best_x(2:cols, :);
+    best_c = best_x(cols+1:end, :);
   endif
   testing_flag = 1;
   
   
-  # DATA_test = [1,1,0;1,1,0]
-  
+  DATA_test = [1,1,0;1,1,0]
+  #{
   load test.mat
-  DATA_test
-  
+  test;
+  DATA_test = test(:,1:end-1)
+  }#
   
   if testing_flag
     o = train(best_w, best_r, best_c, DATA_test, h_nodes);
