@@ -3,11 +3,34 @@ function main(argv="")
   clc
   disp("Artificial Neural Network")
   
-  # Matriz simple
+  # Behavior flags
+  train_flag = 1;
+  testing_flag = 1;
+  
+  # Parameters
+  
+  h_nodes = 3; #number of hidden layers
+  
+  iterations = 100; # swarm iterations
+  n_particles = 25; # particle's amount
+  
+  # cog_coef + col_coef <= 4
+  cog_coef = 1.4; # jugar con esto
+  col_coef = 2.6; # jugar con esto
+  
+  # inertia values
+  w_max = 0.3; # jugar con esto
+  w_min = 0.001; # jugar con esto
+  
+  mse_log = zeros(1,iterations);
+  best_fit = intmax;
+  
+  # Load a simple matrix
   
   load input.mat
   A
   
+  # Load the real matrix
   #{
   load train.mat
   train;
@@ -16,7 +39,7 @@ function main(argv="")
   [rows,cols]=size(A);
   DATASET_class = A(:,cols);
   
-  # Feature selection
+  # Feature manual selection from file
   if length(argv)>0
     printf("Archivo de configuracion: %s\n",argv)
     fid = fopen (argv, 'r');
@@ -37,70 +60,71 @@ function main(argv="")
     DATASET_input = A(:,1:cols-1);
   endif
   
-  DATASET_input
+  # clock
+  start_time = now();
   
-  # Parameters
-  h_nodes = 3;
-  iterations = 100;
-  train_flag = 1;
-  n_particles = 20;
-  cog_coef = 2;
-  col_coef = 2;
-  best_fit = intmax;
-  mse_log = zeros(1,iterations);
-  w_max = 0.95;
-  w_min = 0.1;
+  # PSO initialization
   particles = PSO_init(h_nodes,cols-1,n_particles);
-  # inicializar PSO una vez
   if train_flag
     for i = 1:iterations
       for p = 1:n_particles
-        w = particles(p).x(1,:); #revisar concatenacion
-        r = particles(p).x(2:cols,:);
-        c = particles(p).x(cols+1:end,:);
+        # separate particle's position
+        w = particles(p).x(1,:);
+        r = particles(p).x(2:h_nodes+1,:);
+        c = particles(p).x(h_nodes+2:end,:);
+        # train the model
         o = train(w, r, c, DATASET_input, h_nodes);
-        current_fit = mse(DATASET_class, transpose(o));
-        # comparar cognitivo de particula -> setear el mejor de particula
+        # evaluate
+        current_fit = mse(DATASET_class, o);
+        # compare particle's cognitive value and save the local best
         if current_fit < particles(p).pbest
           particles(p).pbest = current_fit;
           particles(p).xbest = cat(1,w,r,c);
-          # comparar colectivo de enjambre -> setear el mejor de enjambre
+          # compare swarm's colective value and save the best one
           if current_fit < best_fit
             best_fit = current_fit;
             best_x = particles(p).xbest;
           endif
         endif
       endfor
-      mse_log(i) = best_fit;
-      # mover particulas de acuerdo a evaluación
+      mse_log(i) = best_fit; # save historic data
+      
+      # move particles
       inercia = cal_inercia(w_max, w_min, iterations, i);
-      particles = PSO_movement(h_nodes, cols, n_particles, particles, col_coef, cog_coef, best_x, inercia);
+      particles = PSO_movement(h_nodes, cols, n_particles, particles, col_coef,
+          cog_coef, best_x, inercia);
     endfor
-    disp("sutff")
-    pause
     best_w = best_x(1, :);
-    best_r = best_x(2:cols, :);
-    best_c = best_x(cols+1:end, :);
+    best_r = best_x(2:h_nodes+1, :);
+    best_c = best_x(h_nodes+2:end, :);
   endif
-  testing_flag = 1;
   
+  end_training = now();
+  printf(" training time: %f\n", end_training-start_time)
   
-  DATA_test = [1,1,0;1,1,0]
+  # Simple test matrix
+  DATA_test = [1, 1, 0, 0; 1, 1, 0, 0]
+  
+  # The real test matrix
   #{
   load test.mat
   test;
   DATA_test = test(:,1:end-1)
-  }#
+  #}
   
   if testing_flag
-    o = train(best_w, best_r, best_c, DATA_test, h_nodes);
+    o = train(best_w, best_r, best_c, DATA_test, h_nodes)
     [rows,cols] = size(o);
     for o_i = 1:cols
       disp(sign(o(o_i)))
     endfor
-    DATASET_class
   endif
   f_plot(iterations, mse_log);
+  
+  end_time = now();
+  printf(" testing time: %f\n", end_time-end_training)
+  [total, user, system] = cpu_time = cputime();
+  printf(" cpu time: %f\n", total)
 endfunction
 
 function f_plot(iterations, mse_log)
