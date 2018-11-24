@@ -94,6 +94,13 @@ function main(argv="")
       particles = PSO_movement(h_nodes, cols, n_particles, particles, col_coef,
           cog_coef, best_x, inercia);
     endfor
+    save weights.mat best_x
+    best_w = best_x(1, :);
+    best_r = best_x(2:h_nodes+1, :);
+    best_c = best_x(h_nodes+2:end, :);
+  else
+    load weights.mat
+    best_x
     best_w = best_x(1, :);
     best_r = best_x(2:h_nodes+1, :);
     best_c = best_x(h_nodes+2:end, :);
@@ -113,15 +120,19 @@ function main(argv="")
   if testing_flag
     o = train(best_w, best_r, best_c, DATA_test, h_nodes)
     [rows,cols] = size(o);
+    compare = zeros(1,cols);
     for o_i = 1:cols
-      disp(sign(o(o_i)))
+      compare(o_i) = sign(o(o_i));
     endfor
   endif
+  
+  save result.mat compare
+  
   f_plot(iterations, mse_log);
   
   end_time = now();
   printf(" testing time: %f\n", end_time-end_training)
-  [total, user, system] = cpu_time = cputime();
+  [total, user, system] = cputime();
   printf(" cpu time: %f\n", total)
 endfunction
 
