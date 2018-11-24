@@ -11,8 +11,8 @@ function main(argv="")
   
   h_nodes = 3; #number of hidden layers
   
-  iterations = 10; # swarm iterations
-  n_particles = 5; # particle's amount
+  iterations = 100; # swarm iterations
+  n_particles = 25; # particle's amount
   
   # cog_coef + col_coef <= 4
   cog_coef = 1.4; # jugar con esto
@@ -25,16 +25,15 @@ function main(argv="")
   mse_log = zeros(1,iterations);
   best_fit = intmax;
   
-  # Load a simple matrix
-  
-  load input.mat
-  A;
+  # Load a simple matrix|
+  #load input.mat
+  #A;
   
   # Load the real matrix
   
-  #load train.mat
-  #train_dataset;
-  #A = train_dataset;
+  load train.mat
+  train_dataset;
+  A = train_dataset;
   
   [rows,cols]=size(A);
   DATASET_class = A(:,cols);
@@ -110,21 +109,21 @@ function main(argv="")
   printf(" training time: %f\n", end_training-start_time)
   
   # Simple test matrix
-  DATA_test = [1, 1, 0, 0; 1, 1, 0, 0]
-  DATA_class = [1; 1]
+  #DATA_test = [1, 1, 0, 0; 1, 1, 0, 0];
+  #DATA_class = [1; 1];
   
   # The real test matrix
-  #load test.mat
-  #test_dataset;
-  #DATA_test = test_dataset(:,1:end-1)
-  #DATA_class = test_dataset(:,end);
+  load test.mat
+  test_dataset;
+  DATA_test = test_dataset(:,1:end-1)
+  DATA_class = test_dataset(:,end);
   tp = 0;
   tn = 0;
   fp = 0;
   fn = 0;
   
   if testing_flag
-    o = train(best_w, best_r, best_c, DATA_test, h_nodes)
+    o = train(best_w, best_r, best_c, DATA_test, h_nodes);
     [rows,cols] = size(o);
     compare = zeros(1,cols);
     for o_i = 1:cols
