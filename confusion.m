@@ -7,16 +7,27 @@ function [tp, tn, fp, fn] = confusion(tp, tn, fp, fn, p, t)
   p: predicted
   t: true
   #}
-  if p == 1
-    if t == 1
+  
+  #Si predecimos ataque
+  if p == -1
+    #Y si en verdad es ataque
+    if t == -1
+      #Es true positive
       tp = tp + 1;
-    elseif t == -1
+    #Y si en verdad es normal
+    elseif t == 1
+      #Es false positive
       fp = fp + 1;
     endif
-  elseif p == -1
-    if t == 1
+  #Si predecimos normal
+  elseif p == 1
+    #Y si en verdad es ataque
+    if t == -1
+      #Es false negative
       fn = fn + 1;
-    elseif t == -1
+    #Y si en verdad es normal
+    elseif t == 1
+      #Es true negative
       tn = tn + 1;
     endif
   endif
