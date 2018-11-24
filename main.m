@@ -115,7 +115,7 @@ function main(argv="")
   # The real test matrix
   load test.mat
   test_dataset;
-  DATA_test = test_dataset(:,1:end-1)
+  DATA_test = test_dataset(:,1:end-1);
   DATA_class = test_dataset(:,end);
   tp = 0;
   tn = 0;
