@@ -1,4 +1,9 @@
-function [p, f] = metric(tp, fp, fn)
+function [a, f] = metric(tp, tn, fp, fn)
+  if tp + tn + fp + fn != 0
+    a = (tp + tn) / (tp + tn + fp +fn);
+  else
+    a = 0;
+  endif
   if tp + fp != 0
     p = tp / (tp + fp);
   else

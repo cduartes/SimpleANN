@@ -15,8 +15,8 @@ function main(argv="")
   n_particles = 25; # particle's amount
   
   # cog_coef + col_coef <= 4
-  cog_coef = 1.4; # jugar con esto
-  col_coef = 2.6; # jugar con esto
+  cog_coef = 1.7; # jugar con esto
+  col_coef = 1.7; # jugar con esto
   
   # inertia values
   w_max = 0.3; # jugar con esto
@@ -115,7 +115,7 @@ function main(argv="")
   # The real test matrix
   load test.mat
   test_dataset;
-  DATA_test = test_dataset(:,1:end-1)
+  DATA_test = test_dataset(:,1:end-1);
   DATA_class = test_dataset(:,end);
   tp = 0;
   tn = 0;
@@ -131,8 +131,8 @@ function main(argv="")
       compare(o_i) = sign(o(o_i));
     endfor
   endif
-  [p, f] = metric(tp, fp, fn);
-  printf(" precision: %f\n", p)
+  [a, f] = metric(tp, tn, fp, fn);
+  printf(" accuracy: %f\n", a)
   printf(" f-score: %f\n", f) 
   
   save result.mat compare
