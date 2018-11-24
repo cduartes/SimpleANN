@@ -27,15 +27,15 @@ function main(argv="")
   
   # Load a simple matrix
   
-  load input.mat
-  A
+  #load input.mat
+  #A
   
   # Load the real matrix
-  #{
+  
   load train.mat
-  train;
-  A = train;
-  #}
+  train_dataset;
+  A = train_dataset;
+  
   [rows,cols]=size(A);
   DATASET_class = A(:,cols);
   
@@ -103,14 +103,12 @@ function main(argv="")
   printf(" training time: %f\n", end_training-start_time)
   
   # Simple test matrix
-  DATA_test = [1, 1, 0, 0; 1, 1, 0, 0]
+  #DATA_test = [1, 1, 0, 0; 1, 1, 0, 0]
   
   # The real test matrix
-  #{
   load test.mat
-  test;
-  DATA_test = test(:,1:end-1)
-  #}
+  test_dataset;
+  DATA_test = test_dataset(:,1:end-1)
   
   if testing_flag
     o = train(best_w, best_r, best_c, DATA_test, h_nodes)
