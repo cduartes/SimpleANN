@@ -26,14 +26,14 @@ function main(argv="")
   best_fit = intmax;
   
   # Load a simple matrix
-  load input.mat
-  A;
+  #load input.mat
+  #A;
   
   # Load the real matrix
   
-  #load train.mat
-  #train_dataset;
-  #A = train_dataset;
+  load train.mat
+  train_dataset;
+  A = train_dataset;
   
   [rows,cols]=size(A);
   DATASET_class = A(:,cols);
@@ -109,14 +109,14 @@ function main(argv="")
   printf(" training time: %f\n", end_training-start_time)
   
   # Simple test matrix
-  DATA_test = [1, 1, 0, 0; 1, 1, 0, 0; 0, 0, 1, 1];
-  DATA_class = [1; 1; -1];
+  #DATA_test = [1, 1, 0, 0; 1, 1, 0, 0; 0, 0, 1, 1];
+  #DATA_class = [1; 1; -1];
   
   # The real test matrix
-  #load test.mat
-  #test_dataset;
-  #DATA_test = test_dataset(:,1:end-1);
-  #DATA_class = test_dataset(:,end);
+  load test.mat
+  test_dataset;
+  DATA_test = test_dataset(:,1:end-1);
+  DATA_class = test_dataset(:,end);
   tp = 0;
   tn = 0;
   fp = 0;
@@ -131,9 +131,6 @@ function main(argv="")
       compare(o_i) = sign(o(o_i));
     endfor
   endif
-  
-  DATASET_class
-  compare
   
   [a, f] = metric(tp, tn, fp, fn);
   printf(" accuracy: %f\n", a)
