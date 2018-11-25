@@ -11,7 +11,7 @@ function main(argv="")
   
   h_nodes = 11; #number of hidden layers
   
-  iterations = 5; # swarm iterations
+  iterations = 30; # swarm iterations
   n_particles = 25; # particle's amount
   
   # cog_coef + col_coef <= 4
@@ -152,8 +152,8 @@ endfunction
 function f_plot(iterations, mse_log)
   x = 1:1:iterations;
   plot (x, mse_log(x));
-  xlabel ("x");
-  ylabel ("sin (x)");
-  title ("Simple 2-D Plot");
+  xlabel ("Iteration");
+  ylabel ("MSE");
+  title ("2-D Plot for MSE/Iteration");
 endfunction
 
