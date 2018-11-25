@@ -9,14 +9,14 @@ function main(argv="")
   
   # Parameters
   
-  h_nodes = 3; #number of hidden layers
+  h_nodes = 11; #number of hidden layers
   
-  iterations = 100; # swarm iterations
+  iterations = 5; # swarm iterations
   n_particles = 25; # particle's amount
   
   # cog_coef + col_coef <= 4
-  cog_coef = 1.7; # jugar con esto
-  col_coef = 1.7; # jugar con esto
+  cog_coef = 2.4; # jugar con esto
+  col_coef = 1.6; # jugar con esto
   
   # inertia values
   w_max = 0.3; # jugar con esto
@@ -25,15 +25,15 @@ function main(argv="")
   mse_log = zeros(1,iterations);
   best_fit = intmax;
   
-  # Load a simple matrix|
-  #load input.mat
-  #A;
+  # Load a simple matrix
+  load input.mat
+  A;
   
   # Load the real matrix
   
-  load train.mat
-  train_dataset;
-  A = train_dataset;
+  #load train.mat
+  #train_dataset;
+  #A = train_dataset;
   
   [rows,cols]=size(A);
   DATASET_class = A(:,cols);
@@ -68,9 +68,9 @@ function main(argv="")
     for i = 1:iterations
       for p = 1:n_particles
         # separate particle's position
-        w = particles(p).x(1,:);
-        r = particles(p).x(2:h_nodes+1,:);
-        c = particles(p).x(h_nodes+2:end,:);
+        w = particles(p).x(:,1);
+        r = particles(p).x(:, 2:cols);
+        c = particles(p).x(:, cols+1:end);
         # train the model
         o = train(w, r, c, DATASET_input, h_nodes);
         # evaluate
@@ -78,7 +78,7 @@ function main(argv="")
         # compare particle's cognitive value and save the local best
         if current_fit < particles(p).pbest
           particles(p).pbest = current_fit;
-          particles(p).xbest = cat(1,w,r,c);
+          particles(p).xbest = cat(2, w, r, c);
           # compare swarm's colective value and save the best one
           if current_fit < best_fit
             best_fit = current_fit;
@@ -94,29 +94,29 @@ function main(argv="")
           cog_coef, best_x, inercia);
     endfor
     save weights.mat best_x
-    best_w = best_x(1, :);
-    best_r = best_x(2:h_nodes+1, :);
-    best_c = best_x(h_nodes+2:end, :);
+    best_w = best_x(:,1);
+    best_r = best_x(:, 2:cols);
+    best_c = best_x(:, cols+1:end);
   else
     load weights.mat
     best_x
-    best_w = best_x(1, :);
-    best_r = best_x(2:h_nodes+1, :);
-    best_c = best_x(h_nodes+2:end, :);
+    best_w = best_x(:,1);
+    best_r = best_x(:, 2:cols);
+    best_c = best_x(:, cols+1:end);
   endif
   
   end_training = now();
   printf(" training time: %f\n", end_training-start_time)
   
   # Simple test matrix
-  #DATA_test = [1, 1, 0, 0; 1, 1, 0, 0];
-  #DATA_class = [1; 1];
+  DATA_test = [1, 1, 0, 0; 1, 1, 0, 0; 0, 0, 1, 1];
+  DATA_class = [1; 1; -1];
   
   # The real test matrix
-  load test.mat
-  test_dataset;
-  DATA_test = test_dataset(:,1:end-1);
-  DATA_class = test_dataset(:,end);
+  #load test.mat
+  #test_dataset;
+  #DATA_test = test_dataset(:,1:end-1);
+  #DATA_class = test_dataset(:,end);
   tp = 0;
   tn = 0;
   fp = 0;
@@ -131,6 +131,10 @@ function main(argv="")
       compare(o_i) = sign(o(o_i));
     endfor
   endif
+  
+  DATASET_class
+  compare
+  
   [a, f] = metric(tp, tn, fp, fn);
   printf(" accuracy: %f\n", a)
   printf(" f-score: %f\n", f) 

@@ -1,8 +1,8 @@
-# Created by Octave 4.4.1, Sat Nov 24 10:56:14 2018 GMT <unknown@Experience5000>
+# Created by Octave 4.4.1, Sun Nov 25 16:01:10 2018 GMT <unknown@Experience5000>
 # name: compare
 # type: matrix
 # rows: 1
-# columns: 2
- 1 1
+# columns: 3
+ 1 1 -1
 
 
