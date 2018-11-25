@@ -11,7 +11,7 @@ function main(argv="")
   
   h_nodes = 11; #number of hidden layers
   
-  iterations = 30; # swarm iterations
+  iterations = 1; # swarm iterations
   n_particles = 25; # particle's amount
   
   # cog_coef + col_coef <= 4
