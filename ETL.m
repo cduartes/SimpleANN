@@ -13,7 +13,7 @@ function ETL
       matrix_etl = new_line;
     else
       line = fgets(file);
-      A = strsplit(line, ","); 
+      A = strsplit(line, ",");
       new_line=cell2Double(A, cols);
       new_line;
       matrix_etl = vertcat(matrix_etl, new_line);
