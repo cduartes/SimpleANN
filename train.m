@@ -4,7 +4,6 @@ function [o] = train(w, r, c, input, h_nodes)
   # input to hidden layer
   z1 = transfer(w, r, c, input, h_nodes);
   # hidden layer to output layer
-  
   #{
   [cols,rows] = size(z1);
   o = zeros(1,rows);

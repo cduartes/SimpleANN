@@ -6,17 +6,18 @@ function main(argv="")
   # Behavior flags
   train_flag = 1;
   testing_flag = 1;
+  rand_flag = 1;
   
   # Parameters
   
-  h_nodes = 11; #number of hidden layers
+  h_nodes = 5; #number of hidden layers
   
-  iterations = 1; # swarm iterations
-  n_particles = 25; # particle's amount
+  iterations = 30; # swarm iterations
+  n_particles = 7; # particle's amount
   
   # cog_coef + col_coef <= 4
-  cog_coef = 2.4; # jugar con esto
-  col_coef = 1.6; # jugar con esto
+  cog_coef = 2; # jugar con esto
+  col_coef = 2; # jugar con esto
   
   # inertia values
   w_max = 0.3; # jugar con esto
@@ -31,12 +32,16 @@ function main(argv="")
   
   # Load the real matrix
   
-  load train.mat
+  load normalizado.mat
   train_dataset;
-  A = train_dataset;
+  
+  p_train = 0.5;
+  #x_train ,y_train, x_test, y_test
+  [A, DATASET_class, DATA_test, DATA_class] = dataset_test_split(train_dataset, p_train, rand_flag);
   
   [rows,cols]=size(A);
-  DATASET_class = A(:,cols);
+  cols = cols+1;
+  #DATASET_class = A(:,cols);
   
   # Feature manual selection from file
   if length(argv)>0
@@ -113,10 +118,10 @@ function main(argv="")
   #DATA_class = [1; 1; -1];
   
   # The real test matrix
-  load test.mat
-  test_dataset;
-  DATA_test = test_dataset(:,1:end-1);
-  DATA_class = test_dataset(:,end);
+  #load normalizado.mat
+  #train_dataset;
+  #DATA_test = test_dataset(:,1:end-1);
+  #DATA_class = test_dataset(:,end);
   tp = 0;
   tn = 0;
   fp = 0;
