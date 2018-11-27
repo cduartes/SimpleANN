@@ -4,44 +4,54 @@ function main(argv="")
   disp("Artificial Neural Network")
   
   # Behavior flags
-  train_flag = 1;
-  testing_flag = 1;
-  rand_flag = 1;
+  train_flag = 1;   # 
+  testing_flag = 1; # 
+  split_flag = 0;   # split single file for training and testing
   
   # Parameters
   
-  h_nodes = 5; #number of hidden layers
+  h_nodes = 5;      # number of hidden layers
   
-  iterations = 30; # swarm iterations
-  n_particles = 7; # particle's amount
+  iterations = 30;  # swarm iterations
+  n_particles = 6;  # particle's amount
   
-  # cog_coef + col_coef <= 4
-  cog_coef = 2; # jugar con esto
-  col_coef = 2; # jugar con esto
+  # cognitive + colective <= 4
+  cog_coef = 2;     # jugar con esto
+  col_coef = 2;     # jugar con esto
   
   # inertia values
-  w_max = 0.3; # jugar con esto
-  w_min = 0.001; # jugar con esto
+  w_max = 0.300;      # jugar con esto
+  w_min = 0.001;    # jugar con esto
   
   mse_log = zeros(1,iterations);
   best_fit = intmax;
   
-  # Load a simple matrix
-  #load input.mat
-  #A;
+  # load files
+  x_file = "train_x.txt";
+  y_file = "train_y.txt";
+  sep = ";";
+  input = convert(x_file, y_file, sep);
+  x_file = "test_x.txt";
+  y_file = "test_y.txt";
+  output = convert(x_file, y_file, sep);
   
-  # Load the real matrix
+  printf("Parameters\n")
+  printf(" PSO\n")
+  printf("\titer = %d n = %d cog = %f col = %f\n", iterations, n_particles, cog_coef, col_coef)
+  printf("\tw_max = %f w_min = %f\n", w_max, w_min)
+  printf(" Hidden nodes: %d \n\n", h_nodes)
   
-  load normalizado.mat
-  train_dataset;
+  printf(" input size: %d %d\n", size(input))
+  printf(" output size: %d %d\n\n", size(output))
   
-  p_train = 0.5;
-  #x_train ,y_train, x_test, y_test
-  [A, DATASET_class, DATA_test, DATA_class] = dataset_test_split(train_dataset, p_train, rand_flag);
-  
-  [rows,cols]=size(A);
-  cols = cols+1;
-  #DATASET_class = A(:,cols);
+  if split_flag
+    #train_x ,train_y, test_x, test_y
+    p_train = 0.5;
+    rand_flag = 1;  # randomly arranged rows
+    [A, DATASET_class, DATA_test, DATA_class] = dataset_test_split(train_dataset, p_train, rand_flag);
+  endif
+  [rows,cols]=size(input);
+  train_y = input(:,cols);
   
   # Feature manual selection from file
   if length(argv)>0
@@ -52,20 +62,20 @@ function main(argv="")
     printf(" Caracteristicas seleccionadas: %d\n", length(dataColumns))
     g=sprintf('%s ', dataColumns{});
     printf(' Caracteristicas: %s\n', g)
-    DATASET_input = zeros(rows,length(dataColumns));
+    train_x = zeros(rows,length(dataColumns));
     a=1;
     for c = 1:length(dataColumns)
       for r = 1:rows
-        DATASET(r,a) = A(r,c);
+        train_x(r,a) = input(r,c);
       endfor
       a++;
     endfor
   else
-    DATASET_input = A(:,1:cols-1);
+    train_x = input(:,1:cols-1);
   endif
   
-  # clock
-  start_time = now();
+  [total, user, system] = cputime();
+  start_time = total;
   
   # PSO initialization
   particles = PSO_init(h_nodes,cols-1,n_particles);
@@ -77,9 +87,9 @@ function main(argv="")
         r = particles(p).x(:, 2:cols);
         c = particles(p).x(:, cols+1:end);
         # train the model
-        o = train(w, r, c, DATASET_input, h_nodes);
+        o = train(w, r, c, train_x, h_nodes); # feed-forward method
         # evaluate
-        current_fit = mse(DATASET_class, o);
+        current_fit = mse(train_y, o);
         # compare particle's cognitive value and save the local best
         if current_fit < particles(p).pbest
           particles(p).pbest = current_fit;
@@ -110,45 +120,41 @@ function main(argv="")
     best_c = best_x(:, cols+1:end);
   endif
   
-  end_training = now();
-  printf(" training time: %f\n", end_training-start_time)
+  [total, user, system] = cputime();
+  end_training = total;
+  printf(" training time: %f\n\n", end_training-start_time)
+
+  test_x = output(:,1:end-1);
+  train_y = output(:,end);
   
-  # Simple test matrix
-  #DATA_test = [1, 1, 0, 0; 1, 1, 0, 0; 0, 0, 1, 1];
-  #DATA_class = [1; 1; -1];
-  
-  # The real test matrix
-  #load normalizado.mat
-  #train_dataset;
-  #DATA_test = test_dataset(:,1:end-1);
-  #DATA_class = test_dataset(:,end);
   tp = 0;
   tn = 0;
   fp = 0;
   fn = 0;
   
   if testing_flag
-    o = train(best_w, best_r, best_c, DATA_test, h_nodes);
+    o = train(best_w, best_r, best_c, test_x, h_nodes);
     [rows,cols] = size(o);
     compare = zeros(1,cols);
     for o_i = 1:cols
-      [tp, tn, fp, fn] = confusion(tp, tn, fp, fn, sign(o(o_i)), DATA_class(o_i));
+      [tp, tn, fp, fn] = confusion(tp, tn, fp, fn, sign(o(o_i)), train_y(o_i));
       compare(o_i) = sign(o(o_i));
     endfor
   endif
   
-  [a, f] = metric(tp, tn, fp, fn);
+  [a, f1, f2] = metric(tp, tn, fp, fn);
   printf(" accuracy: %f\n", a)
-  printf(" f-score: %f\n", f) 
+  printf(" f-score ataque: %f\n", f1) 
+  printf(" f-score normal: %f\n", f2) 
   
   save result.mat compare
   
   f_plot(iterations, mse_log);
   
-  end_time = now();
-  printf(" testing time: %f\n", end_time-end_training)
+  #end_time = now();
   [total, user, system] = cputime();
-  printf(" cpu time: %f\n", total)
+  end_time = total;
+  printf(" testing time: %f\n", end_time-end_training)
 endfunction
 
 function f_plot(iterations, mse_log)

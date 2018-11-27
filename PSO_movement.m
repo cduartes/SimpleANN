@@ -12,5 +12,5 @@ function [vel] = cal_vel(inercia, col_coef, cog_coef, particle, best_x)
   r2 = rand();
   old_vel = particle.vel;
   # new velocity
-  vel = inercia*old_vel+r1*col_coef*(particle.xbest-particle.x)+r2*cog_coef*(best_x-particle.x);
+  vel = inercia*old_vel+r1*cog_coef*(particle.xbest-particle.x)+r2*col_coef*(best_x-particle.x);
 endfunction
