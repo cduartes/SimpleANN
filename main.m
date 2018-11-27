@@ -157,7 +157,8 @@ function main(argv="")
   [total, user, system] = cputime();
   end_time = total;
   printf(" testing time: %fs\n", end_time-end_training)
-  printf("->finish time: %s\n",strftime ("%H:%M:%S", localtime (time())))
+  printf(" total time: %fs\n", end_time-start_time)
+  printf("->finish time: %s\n", strftime("%H:%M:%S", localtime(time())))
 endfunction
 
 function f_plot(iterations, mse_log)
