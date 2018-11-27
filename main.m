@@ -35,11 +35,13 @@ function main(argv="")
   y_file = "test_y.txt";
   output = convert(x_file, y_file, sep);
   
-  printf("Parameters\n")
-  printf(" PSO\n")
-  printf("\titer = %d n = %d cog = %f col = %f\n", iterations, n_particles, cog_coef, col_coef)
-  printf("\tw_max = %f w_min = %f\n", w_max, w_min)
-  printf(" Hidden nodes: %d \n\n", h_nodes)
+  
+  printf("->start time: %s\n",strftime ("%H:%M:%S", localtime (time())))
+  printf(" Parameters\n")
+  printf("  PSO\n")
+  printf("   iter = %d n = %d cog = %f col = %f\n", iterations, n_particles, cog_coef, col_coef)
+  printf("   w_max = %f w_min = %f\n", w_max, w_min)
+  printf("  Hidden nodes: %d \n\n", h_nodes)
   
   printf(" input size: %d %d\n", size(input))
   printf(" output size: %d %d\n\n", size(output))
@@ -122,7 +124,7 @@ function main(argv="")
   
   [total, user, system] = cputime();
   end_training = total;
-  printf(" training time: %f\n\n", end_training-start_time)
+  printf(" training time: %fs\n\n", end_training-start_time)
 
   test_x = output(:,1:end-1);
   train_y = output(:,end);
@@ -146,7 +148,7 @@ function main(argv="")
   printf(" accuracy: %f\n", a)
   printf(" f-score ataque: %f\n", f1) 
   printf(" f-score normal: %f\n", f2) 
-  
+ 
   save result.mat compare
   
   f_plot(iterations, mse_log);
@@ -154,7 +156,8 @@ function main(argv="")
   #end_time = now();
   [total, user, system] = cputime();
   end_time = total;
-  printf(" testing time: %f\n", end_time-end_training)
+  printf(" testing time: %fs\n", end_time-end_training)
+  printf("->finish time: %s\n",strftime ("%H:%M:%S", localtime (time())))
 endfunction
 
 function f_plot(iterations, mse_log)
