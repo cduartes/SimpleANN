@@ -1,4 +1,4 @@
-function [o] = train(w, r, c, input, h_nodes)
+function [o] = feedforward(w, r, c, input, h_nodes)
   currentmse = 0;
   [rows,cols]=size(input);
   # input to hidden layer

@@ -3,38 +3,37 @@ function main(argv="")
   clc
   disp("Artificial Neural Network")
   
-  # Behavior flags
-  train_flag = 1;   # 
-  testing_flag = 1; # 
-  split_flag = 0;   # split single file for training and testing
+  # Control's flags
+  train_flag = 1;     # 1 to activate training; 0 to deactivate
+  testing_flag = 1;   # 1 to activate testing; 0 to deactivate
   
   # Parameters
   
-  h_nodes = 7;      # number of hidden layers
+  h_nodes = 7;       # number of hidden layers
   
-  iterations = 100;  # swarm iterations
-  n_particles = 20;  # particle's amount
+  iterations = 30;    # swarm iterations
+  n_particles = 8;    # particle's amount
   
   # cognitive + colective <= 4
-  cog_coef = 1.7;     # jugar con esto
-  col_coef = 1.7;     # jugar con esto
+  cog_coef = 1.8;     # cognitive coef
+  col_coef = 2.2;     # colective coef
   
   # inertia values
-  w_max = 0.300;      # jugar con esto
-  w_min = 0.020;    # jugar con esto
+  w_max = 0.35;       # Max inertia
+  w_min = 0.035;      # Min inertia
   
   mse_log = zeros(1,iterations);
   best_fit = intmax;
   
-  # load files
+  ########## Carga de archivos ##########
+  
   x_file = "InputTrn.txt";
   y_file = "OutpuTrn.txt";
   sep = ";";
-  input = convert(x_file, y_file, sep);
+  train_dataset = convert(x_file, y_file, sep); # convertion to matrix and union
   x_file = "InputTst.txt";
   y_file = "OutpuTst.txt";
-  output = convert(x_file, y_file, sep);
-  
+  test_dataset = convert(x_file, y_file, sep); # convertion to matrix and union
   
   printf("->start time: %s\n",strftime ("%H:%M:%S", localtime (time())))
   printf(" Parameters\n")
@@ -43,43 +42,56 @@ function main(argv="")
   printf("   w_max = %f w_min = %f\n", w_max, w_min)
   printf("  Hidden nodes: %d \n\n", h_nodes)
   
-  printf(" input size: %d %d\n", size(input))
-  printf(" output size: %d %d\n\n", size(output))
+  printf(" training dataset size: %d %d\n", size(train_dataset))
+  printf(" testing dataset size: %d %d\n\n", size(test_dataset))
   
-  if split_flag
-    #train_x ,train_y, test_x, test_y
-    p_train = 0.5;
-    rand_flag = 1;  # randomly arranged rows
-    [A, DATASET_class, DATA_test, DATA_class] = dataset_test_split(train_dataset, p_train, rand_flag);
-  endif
-  [rows,cols]=size(input);
-  train_y = input(:,cols);
+  [rows, cols]=size(train_dataset);
+  train_y = train_dataset(:, cols);
   
-  # Feature manual selection from file
+  [rows_test, cols_test] = size(test_dataset);
+  test_y = test_dataset(:, cols_test);
+  
+  ##### Selección de caracteristicas ####
+  # argv es el archivo donde están las caracteristicas seleccionadas
   if length(argv)>0
     printf("Archivo de configuracion: %s\n",argv)
     fid = fopen (argv, 'r');
     txt = fgetl (fid);
     dataColumns = strsplit(txt, " ");
-    printf(" Caracteristicas seleccionadas: %d\n", length(dataColumns))
+    printf(" Selected features: %d\n", length(dataColumns))
     g=sprintf('%s ', dataColumns{});
-    printf(' Caracteristicas: %s\n', g)
-    train_x = zeros(rows,length(dataColumns));
+    printf(' Features: %s\n', g)
+    train_x = zeros(rows, length(dataColumns));
+    test_x = zeros(rows_test, length(dataColumns));
     a=1;
     for c = 1:length(dataColumns)
       for r = 1:rows
-        train_x(r,a) = input(r,c);
+        train_x(r,a) = train_dataset(r,c);
+      endfor
+      
+      for r = 1:rows_test
+        test_x(r,a) = test_dataset(r,c);
       endfor
       a++;
     endfor
+    
+    printf(" training dataset size: %d %d\n", size(train_x)+[0,1])
+    printf(" testing dataset size: %d %d\n\n", size(test_x)+[0,1])
+    cols = length(dataColumns)+1;
   else
-    train_x = input(:,1:cols-1);
+    train_x = train_dataset(:,1:cols-1);
+    test_x = test_dataset(:,1:end-1);
   endif
   
   [total, user, system] = cputime();
   start_time = total;
   
-  # PSO initialization
+  
+  ########### Entrenamiento ##########
+  #NOTA: Recibe set de entrenamiento separado en
+  # train_x: set de caracteristicas de training
+  # train_y: set de clases de training
+  
   particles = PSO_init(h_nodes,cols-1,n_particles);
   if train_flag
     for i = 1:iterations
@@ -89,7 +101,7 @@ function main(argv="")
         r = particles(p).x(:, 2:cols);
         c = particles(p).x(:, cols+1:end);
         # train the model
-        o = train(w, r, c, train_x, h_nodes); # feed-forward method
+        o = feedforward(w, r, c, train_x, h_nodes); # feed-forward method
         # evaluate
         current_fit = mse(train_y, o);
         # compare particle's cognitive value and save the local best
@@ -125,9 +137,14 @@ function main(argv="")
   [total, user, system] = cputime();
   end_training = total;
   printf(" training time: %fs\n\n", end_training-start_time)
-
-  test_x = output(:,1:end-1);
-  train_y = output(:,end);
+  
+  ############### Pruebas #############
+  #NOTA: recibe parametros de
+  # test_x: set de caracteristicas de testing
+  # test_y: set de clases de testing
+  # best_w: vector de pesos
+  # best_r: matriz de pesos radios
+  # best_c: matriz de pesos centros
   
   tp = 0;
   tn = 0;
@@ -135,7 +152,7 @@ function main(argv="")
   fn = 0;
   
   if testing_flag
-    o = train(best_w, best_r, best_c, test_x, h_nodes);
+    o = feedforward(best_w, best_r, best_c, test_x, h_nodes);
     [rows,cols] = size(o);
     compare = zeros(1,cols);
     for o_i = 1:cols
@@ -144,6 +161,7 @@ function main(argv="")
     endfor
   endif
   
+  #### Impresion de resultados ####
   [a, f1, f2] = metric(tp, tn, fp, fn);
   printf(" True Positive: %d\n", tp)
   printf(" True Negative: %d\n", tn)
@@ -156,11 +174,10 @@ function main(argv="")
   save result.mat compare
   
   f_plot(iterations, mse_log);
-  
-  #end_time = now();
+
   [total, user, system] = cputime();
   end_time = total;
-  printf(" testing time: %fs\n", end_time-end_training)
+  printf(" testing time: %fs\n\n", end_time-end_training)
   printf(" total time: %fs\n", end_time-start_time)
   printf("->finish time: %s\n", strftime("%H:%M:%S", localtime(time())))
 endfunction
