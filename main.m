@@ -10,29 +10,29 @@ function main(argv="")
   
   # Parameters
   
-  h_nodes = 5;      # number of hidden layers
+  h_nodes = 7;      # number of hidden layers
   
-  iterations = 30;  # swarm iterations
-  n_particles = 6;  # particle's amount
+  iterations = 100;  # swarm iterations
+  n_particles = 20;  # particle's amount
   
   # cognitive + colective <= 4
-  cog_coef = 2;     # jugar con esto
-  col_coef = 2;     # jugar con esto
+  cog_coef = 1.7;     # jugar con esto
+  col_coef = 1.7;     # jugar con esto
   
   # inertia values
   w_max = 0.300;      # jugar con esto
-  w_min = 0.001;    # jugar con esto
+  w_min = 0.020;    # jugar con esto
   
   mse_log = zeros(1,iterations);
   best_fit = intmax;
   
   # load files
-  x_file = "train_x.txt";
-  y_file = "train_y.txt";
+  x_file = "InputTrn.txt";
+  y_file = "OutpuTrn.txt";
   sep = ";";
   input = convert(x_file, y_file, sep);
-  x_file = "test_x.txt";
-  y_file = "test_y.txt";
+  x_file = "InputTst.txt";
+  y_file = "OutpuTst.txt";
   output = convert(x_file, y_file, sep);
   
   
@@ -145,6 +145,10 @@ function main(argv="")
   endif
   
   [a, f1, f2] = metric(tp, tn, fp, fn);
+  printf(" True Positive: %d\n", tp)
+  printf(" True Negative: %d\n", tn)
+  printf(" False Positive: %d\n", fp)
+  printf(" False Negative: %d\n", fn)
   printf(" accuracy: %f\n", a)
   printf(" f-score ataque: %f\n", f1) 
   printf(" f-score normal: %f\n", f2) 
