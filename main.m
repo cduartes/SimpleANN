@@ -4,12 +4,12 @@ function main(argv="")
   disp("Artificial Neural Network")
   
   # Control's flags
-  train_flag = 0;     # 1 to activate training; 0 to deactivate
-  testing_flag = 1;   # 1 to activate testing; 0 to deactivate
+  train_flag = 1;     # 1 to activate training; 0 to deactivate
+  testing_flag = 0;   # 1 to activate testing; 0 to deactivate
   
   # Parameters
   
-  h_nodes = 9;          # number of hidden layers
+  h_nodes = 1;          # number of hidden layers
   
   iterations = 1;     # swarm iterations
   n_particles = 1;     # particle's amount
@@ -81,10 +81,6 @@ function main(argv="")
     test_x = test_dataset(:, 1:end-1);
   endif
   
-  [total, user, system] = cputime();
-  start_time = total;
-  
-  
   ########### Entrenamiento ##########
   #NOTA: Recibe set de entrenamiento separado en
   # train_x: set de caracteristicas de training
@@ -94,11 +90,13 @@ function main(argv="")
   # iterations: cantidad de iteraciones
   # h_nodes: cantidad de nodos ocultos
   
+  [start_time, user, system] = cputime();
   mse_log = zeros(1, iterations);
   best_fit = intmax;
   
   particles = PSO_init(h_nodes,cols-1,n_particles);
   if train_flag
+    [start_training, user, system] = cputime();
     printf("Training stage...\n")
     for i = 1:iterations
       for p = 1:n_particles
@@ -128,13 +126,14 @@ function main(argv="")
       particles = PSO_movement(h_nodes, cols, n_particles, particles, col_coef,
           cog_coef, best_x, inercia);
     endfor
-    save weights.mat best_x   
+    save weights.mat best_x  
+    
     f_plot(iterations, mse_log);
+    
+    printf(" weights saved, now ploting...\n")
+    [end_training, user, system] = cputime();
+    printf(" training time: %fs\n\n", end_training-start_training)
   endif
-  
-  [total, user, system] = cputime();
-  end_training = total;
-  printf(" training time: %fs\n\n", end_training-start_time)
   
   ############### Pruebas #############
   #NOTA: recibe parametros de
@@ -148,6 +147,7 @@ function main(argv="")
   # h_nodes: nodos ocultos, obtenido de las filas de matriz de pesos
   
   if testing_flag
+    [start_testing, user, system] = cputime();
     tp = 0;
     tn = 0;
     fp = 0;
@@ -155,7 +155,7 @@ function main(argv="")
     
     # carga de pesos desde archivo mat
     [rows, cols] = size(test_x);
-    load weights2.mat
+    load weights.mat
     best_x;
     best_w = best_x(:,1);
     h_nodes = size(best_w)(1);
@@ -174,9 +174,6 @@ function main(argv="")
       compare(o_i) = sign(o(o_i));
     endfor
     
-    [total, user, system] = cputime();
-    end_time = total;
-    printf(" testing time: %fs\n\n", end_time-end_training)
     #### Impresion de resultados ####
     [a, f1, f2] = metric(tp, tn, fp, fn);
     printf(" True Positive: %d\n", tp)
@@ -188,8 +185,12 @@ function main(argv="")
     printf(" f-score normal: %f\n", f2) 
     
     save result.mat compare
+    
+    [end_testing, user, system] = cputime();
+    printf(" testing time: %fs\n\n", end_testing-start_testing)
   endif
   
+  [end_time, user, system] = cputime();
   printf(" total time: %fs\n", end_time-start_time)
   printf("->finish time: %s\n", strftime("%H:%M:%S", localtime(time())))
 endfunction
