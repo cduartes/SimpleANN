@@ -4,7 +4,7 @@ function main(argv="")
   disp("Artificial Neural Network")
   
   # Control's flags
-  train_flag = 1;     # 1 to activate training; 0 to deactivate
+  train_flag = 0;     # 1 to activate training; 0 to deactivate
   testing_flag = 1;   # 1 to activate testing; 0 to deactivate
   
   # Parameters
@@ -129,6 +129,7 @@ function main(argv="")
           cog_coef, best_x, inercia);
     endfor
     save weights.mat best_x   
+    f_plot(iterations, mse_log);
   endif
   
   [total, user, system] = cputime();
@@ -145,7 +146,6 @@ function main(argv="")
   # best_c: matriz de pesos centros, 
   #        desde D (cantidad de caracteristicas) + 1 hasta final de matriz de pesos
   # h_nodes: nodos ocultos, obtenido de las filas de matriz de pesos
-  # cols: cantidad de caracteristicas del dataset
   
   if testing_flag
     tp = 0;
@@ -154,42 +154,41 @@ function main(argv="")
     fn = 0;
     
     # carga de pesos desde archivo mat
-    load weights.mat
+    [rows, cols] = size(test_x);
+    load weights2.mat
+    best_x;
     best_w = best_x(:,1);
     h_nodes = size(best_w)(1);
-    best_r = best_x(:, 2:cols);
-    best_c = best_x(:, cols+1:end);
+    best_r = best_x(:, 2:cols+1);
+    best_c = best_x(:, cols+2:end);
     
     printf(" Hidden nodes: %d \n", h_nodes)
+    printf(" Features: %d \n", cols)
     printf("Testing stage...\n")
 
     o = feedforward(best_w, best_r, best_c, test_x, h_nodes);
     [rows, cols] = size(o);
     compare = zeros(1,cols);
     for o_i = 1:cols
-      [tp, tn, fp, fn] = confusion(tp, tn, fp, fn, sign(o(o_i)), train_y(o_i));
+      [tp, tn, fp, fn] = confusion(tp, tn, fp, fn, sign(o(o_i)), test_y(o_i));
       compare(o_i) = sign(o(o_i));
     endfor
     
     [total, user, system] = cputime();
     end_time = total;
     printf(" testing time: %fs\n\n", end_time-end_training)
+    #### Impresion de resultados ####
+    [a, f1, f2] = metric(tp, tn, fp, fn);
+    printf(" True Positive: %d\n", tp)
+    printf(" True Negative: %d\n", tn)
+    printf(" False Positive: %d\n", fp)
+    printf(" False Negative: %d\n", fn)
+    printf(" accuracy: %f\n", a)
+    printf(" f-score ataque: %f\n", f1) 
+    printf(" f-score normal: %f\n", f2) 
+    
+    save result.mat compare
   endif
-  
-  
-  #### Impresion de resultados ####
-  [a, f1, f2] = metric(tp, tn, fp, fn);
-  printf(" True Positive: %d\n", tp)
-  printf(" True Negative: %d\n", tn)
-  printf(" False Positive: %d\n", fp)
-  printf(" False Negative: %d\n", fn)
-  printf(" accuracy: %f\n", a)
-  printf(" f-score ataque: %f\n", f1) 
-  printf(" f-score normal: %f\n", f2) 
- 
-  save result.mat compare
-  
-  f_plot(iterations, mse_log);
   
   printf(" total time: %fs\n", end_time-start_time)
   printf("->finish time: %s\n", strftime("%H:%M:%S", localtime(time())))
