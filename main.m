@@ -6,8 +6,8 @@ function main(argv="")
   disp("Artificial Neural Network")
   
   # Control's flags
-  train_flag = 0;     # 1 to activate training; 0 to deactivate
-  testing_flag = 1;   # 1 to activate testing; 0 to deactivate
+  train_flag = 1;     # 1 to activate training; 0 to deactivate
+  testing_flag = 0;   # 1 to activate testing; 0 to deactivate
   
   # Parameters
   
@@ -52,8 +52,8 @@ function main(argv="")
   printf(" testing dataset size: %d %d\n\n", size(test_dataset))
   
 
-  ##### Selección de caracteristicas ####
-  # argv es el archivo donde están las caracteristicas seleccionadas
+  ##### Selecciï¿½n de caracteristicas ####
+  # argv es el archivo donde estï¿½n las caracteristicas seleccionadas
   if length(argv)>0
     printf("File: %s\n", argv)
     fid = fopen (argv, 'r');
@@ -84,7 +84,6 @@ function main(argv="")
     test_x = test_dataset(:, 1:end-1);
   endif
   
-  
   ########### Entrenamiento ##########
   #NOTA: Recibe set de entrenamiento separado en
   # train_x: set de caracteristicas de training
@@ -95,7 +94,6 @@ function main(argv="")
   # h_nodes: cantidad de nodos ocultos
   
   [start_time, user, system] = cputime();
-
   mse_log = zeros(1, iterations);
   best_fit = intmax;
   
