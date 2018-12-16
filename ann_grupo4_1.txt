@@ -1,0 +1,26 @@
+>> main
+Artificial Neural Network
+->start time: 16:07:34
+ Parameters
+  PSO
+   iter = 1 n = 1 cog = 1.655000 col = 1.655000
+   w_max = 0.350000 w_min = 0.050000
+  Hidden nodes: 1 
+
+ training dataset size: 2860 42
+ testing dataset size: 458 42
+
+ Hidden nodes: 11 
+ Features: 41 
+Testing stage...
+ True Positive: 172
+ True Negative: 221
+ False Positive: 8
+ False Negative: 57
+ accuracy: 0.858079
+ f-score ataque: 0.841076
+ f-score normal: 0.871795
+ testing time: 0.453125s
+
+ total time: 0.453125s
+->finish time: 16:07:35
